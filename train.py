@@ -4,7 +4,7 @@ from torch.utils import data
 import torchvision
 from torchvision import transforms
 from torchvision import datasets
-from net import LeNet, AlexNet, MLP
+from net import LeNet, AlexNet, MLP, VGG11
 
 # 数据集加载
 def data_download_fashionmnist(batch_size, resize=None):
@@ -13,12 +13,12 @@ def data_download_fashionmnist(batch_size, resize=None):
     if resize:
         t.insert(0, transforms.Resize(resize))
     # 下载数据集
-    train_dataset = datasets.FashionMNIST(root='learning/data',
+    train_dataset = datasets.FashionMNIST(root=r'DeepLearning\data',
                                           train=True,
                                           download=True,
                                           transform=transforms.Compose(t)
                                           )
-    test_dataset = datasets.FashionMNIST(root='learning/data',
+    test_dataset = datasets.FashionMNIST(root=r'DeepLearning\data',
                                          train=False,
                                          download=True,
                                          transform=transforms.Compose(t)
@@ -67,17 +67,18 @@ if __name__ == '__main__':
     print(f"Using device: {device}")
 
     BATCH_SIZE = 64
-    EPOCHS = 1
-    LR = 0.1
+    EPOCHS = 10
+    LR = 0.05
     
-
     # 网络定义
-    net = MLP().to(device)
-    RESIZE = None
+    # net = MLP().to(device)
+    # RESIZE = None
     # net = LeNet().to(device)
     # RESIZE = None
     # net = AlexNet().to(device)
     # RESIZE = 224
+    net = VGG11().to(device)
+    RESIZE = 224
 
     train, test = data_download_fashionmnist(BATCH_SIZE, resize=RESIZE)
 
