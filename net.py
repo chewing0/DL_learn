@@ -126,3 +126,35 @@ class VGG11(nn.Module):
         return x
 
 # NiN网络
+def NiNBlock(in_channels, out_channels, kernel_size, strides, padding):
+    return nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, kernel_size, strides, padding),
+        nn.ReLU(),
+        nn.Conv2d(out_channels, out_channels, kernel_size=1),nn.ReLU(),
+        nn.Conv2d(out_channels, out_channels, kernel_size=1),nn.ReLU()
+    )
+
+class NiN(nn.Module):
+    def __init__(self):
+        super(NiN, self).__init__()
+        self.block1 = NiNBlock(in_channels=1, out_channels=96, kernel_size=11, strides=4, padding=0)
+        self.block2 = NiNBlock(in_channels=96, out_channels=256, kernel_size=5, strides=1, padding=2)
+        self.block3 = NiNBlock(in_channels=256, out_channels=384, kernel_size=3, strides=1, padding=1)
+        self.block4 = NiNBlock(in_channels=384, out_channels=10, kernel_size=3, strides=1, padding=1)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.flatten = nn.Flatten()
+        self.dropout = nn.Dropout(0.5)
+
+    def forward(self, x):
+        x = self.block1(x)
+        x = self.maxpool(x)
+        x = self.block2(x)
+        x = self.maxpool(x)
+        x = self.block3(x)
+        x = self.maxpool(x)
+        x = self.dropout(x)
+        x = self.block4(x)
+        x = self.avgpool(x)
+        x = self.flatten(x)
+        return x
