@@ -4,7 +4,7 @@ from torch.utils import data
 import torchvision
 from torchvision import transforms
 from torchvision import datasets
-from net import LeNet, AlexNet, MLP, VGG11, NiN
+from net import LeNet, AlexNet, MLP, VGG11, NiN, GoogLeNet
 
 # 数据集加载
 def data_download_fashionmnist(batch_size, resize=None):
@@ -13,12 +13,14 @@ def data_download_fashionmnist(batch_size, resize=None):
     if resize:
         t.insert(0, transforms.Resize(resize))
     # 下载数据集
-    train_dataset = datasets.FashionMNIST(root=r'DeepLearning\data',
+    train_dataset = datasets.FashionMNIST(
+                                          root=r'learning\data',
                                           train=True,
                                           download=True,
                                           transform=transforms.Compose(t)
                                           )
-    test_dataset = datasets.FashionMNIST(root=r'DeepLearning\data',
+    test_dataset = datasets.FashionMNIST(
+                                         root=r'learning\data',
                                          train=False,
                                          download=True,
                                          transform=transforms.Compose(t)
@@ -58,7 +60,7 @@ def eval_model(net, test_data, device):
             output = net(imgs)
             _, predicted = torch.max(output.data, 1)
             total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            correct += (predicted == labels).sum().item() 
     acc = 100 * correct / total
     return acc
 
@@ -66,9 +68,9 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
 
-    BATCH_SIZE = 16
-    EPOCHS = 1
-    LR = 0.05
+    BATCH_SIZE = 64
+    EPOCHS = 10
+    LR = 0.01
     
     # 网络定义
     # net = MLP().to(device)
@@ -79,7 +81,9 @@ if __name__ == '__main__':
     # RESIZE = 224
     # net = VGG11().to(device)
     # RESIZE = 224
-    net = NiN().to(device)
+    # net = NiN().to(device)
+    # RESIZE = 224
+    net = GoogLeNet().to(device)
     RESIZE = 224
 
     train, test = data_download_fashionmnist(BATCH_SIZE, resize=RESIZE)
