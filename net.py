@@ -238,3 +238,97 @@ class GoogLeNet(nn.Module):
         x = self.b5(x)
         x = self.fc1(x)
         return x
+    
+# 使用batchnorm的lenet网络
+class LeNet_BatchNorm(nn.Module):
+    def __init__(self):
+        super(LeNet_BatchNorm, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5, padding=2)
+        self.bn1 = nn.BatchNorm2d(6)
+        self.pool1 = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.conv2 = nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5)
+        self.bn2 = nn.BatchNorm2d(16)
+        self.pool2 = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(in_features=16*5*5, out_features=256)
+        self.bn3 = nn.BatchNorm1d(256)
+        self.fc2 = nn.Linear(in_features=256, out_features=64)
+        self.bn4 = nn.BatchNorm1d(64)
+        self.fc3 = nn.Linear(in_features=64, out_features=10)
+
+    def forward(self, x):
+        x = nn.functional.relu(self.conv1(x))
+        x = self.bn1(x)
+        x = self.pool1(x)
+        x = nn.functional.relu(self.conv2(x))
+        x = self.bn2(x)
+        x = self.pool2(x)
+        x = self.flatten(x)
+        x = nn.functional.relu(self.fc1(x))
+        x = self.bn3(x)
+        x = nn.functional.relu(self.fc2(x))
+        x = self.bn4(x)
+        x = self.fc3(x)
+        return x
+    
+# ResNet网络
+# 残差块
+class Residual(nn.Module):
+    def __init__(self,input_channels, num_channels, use_1x1conv=False, strides=1):
+        super().__init__()
+        self.conv1 = nn.Conv2d(input_channels, num_channels, kernel_size=3, padding=1, stride=strides)
+        self.conv2 = nn.Conv2d(num_channels, num_channels, kernel_size=3, padding=1)
+        if use_1x1conv:
+            self.conv3 = nn.Conv2d(input_channels, num_channels,
+                                   kernel_size=1, stride=strides)
+        else:
+            self.conv3 = None
+        self.bn1 = nn.BatchNorm2d(num_channels)
+        self.bn2 = nn.BatchNorm2d(num_channels)
+
+    def forward(self, X):
+        Y = F.relu(self.bn1(self.conv1(X)))
+        Y = self.bn2(self.conv2(Y))
+        if self.conv3:
+            X = self.conv3(X)
+        Y += X
+        return F.relu(Y)
+
+class ResNet18(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+
+            Residual(64, 64, use_1x1conv=False, strides=1),
+            Residual(64, 64, use_1x1conv=False, strides=1),
+
+            Residual(64, 128, use_1x1conv=True, strides=2),
+            Residual(128, 128, use_1x1conv=False, strides=1),
+
+            Residual(128, 256, use_1x1conv=True, strides=2),
+            Residual(256, 256, use_1x1conv=False, strides=1),
+
+            Residual(256, 512, use_1x1conv=True, strides=2),
+            Residual(512, 512, use_1x1conv=False, strides=1),
+
+            nn.AdaptiveAvgPool2d(1), nn.Flatten(),
+            nn.Linear(in_features=512, out_features=10),
+        )
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                if m.bias is not None: nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None: nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        return self.model(x)

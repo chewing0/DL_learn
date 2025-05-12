@@ -4,7 +4,7 @@ from torch.utils import data
 import torchvision
 from torchvision import transforms
 from torchvision import datasets
-from net import LeNet, AlexNet, MLP, VGG11, NiN, GoogLeNet
+from net import LeNet, AlexNet, MLP, VGG11, NiN, GoogLeNet, LeNet_BatchNorm, ResNet18
 
 # 数据集加载
 def data_download_fashionmnist(batch_size, resize=None):
@@ -68,22 +68,33 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
 
-    BATCH_SIZE = 64
+    BATCH_SIZE = 4
     EPOCHS = 10
     LR = 0.01
     
     # 网络定义
+    # MLP网络
     # net = MLP().to(device)
     # RESIZE = None
+    # LeNet网络
     # net = LeNet().to(device)
     # RESIZE = None
+    # alexnet网络
     # net = AlexNet().to(device)
     # RESIZE = 224
+    # vgg11网络
     # net = VGG11().to(device)
     # RESIZE = 224
+    # nin网络
     # net = NiN().to(device)
     # RESIZE = 224
-    net = GoogLeNet().to(device)
+    # googlenet网络
+    # net = GoogLeNet().to(device)
+    # RESIZE = 224
+    # 使用batchnorm的lenent网络
+    # net = LeNet_BatchNorm().to(device)
+    # RESIZE = None
+    net = ResNet18().to(device)
     RESIZE = 224
 
     train, test = data_download_fashionmnist(BATCH_SIZE, resize=RESIZE)
