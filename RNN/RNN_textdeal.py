@@ -9,7 +9,6 @@ def txt_read(file_path):
     txt = [re.sub('[^A-Za-z]+', ' ', line).lower() for line in txt]
     return txt
 
-
 def tokenize(text, token_type='char'):
     if token_type == 'char':
         text = [list(line) for line in text]
@@ -25,16 +24,20 @@ def count_corpus(tokens):
         tokens = [token for line in tokens for token in line]
     return collections.Counter(tokens)
 
+# vocab
+# token_freqs：token及其词频的列表
+# idx_to_token：token索引列表（idx->token）
+# token_to_idx：token及其索引的字典（token->idx）
 class Vocab:
     def __init__(self, tokens=[], min_freq=0, reserved_tokens=[]):
-        # Flatten a 2D list if needed
+        # 展平tokens列表，如果tokens是二维列表，则将其展平为一维
         if tokens and isinstance(tokens[0], list):
             tokens = [token for line in tokens for token in line]
-        # Count token frequencies
+        # 记录token的词频
         counter = collections.Counter(tokens)
         self.token_freqs = sorted(counter.items(), key=lambda x: x[1],
                                   reverse=True)
-        # The list of unique tokens
+        # token及其索引
         self.idx_to_token = list(sorted(set(['<unk>'] + reserved_tokens + [
             token for token, freq in self.token_freqs if freq >= min_freq])))
         self.token_to_idx = {token: idx
@@ -58,8 +61,11 @@ class Vocab:
         return self.token_to_idx['<unk>']
 
 # 至此完成函数文本的预处理，给出vocab
+# 输入：最大token数量 & 分词策略
+# 输出：语料库（token索引列表） & 词表（Vocab对象）
+# 语料库是一个一维列表，包含了所有的token索引
 def load_corpus_time_machine(max_tokens=-1, token_type='word'):
-    file_path = 'learning/data/timemachine.txt'
+    file_path = r'DeepLearning\data\timemachine.txt'
     text = txt_read(file_path)
     tokens = tokenize(text, token_type)
 

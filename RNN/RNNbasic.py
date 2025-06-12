@@ -1,3 +1,5 @@
+# 该文件是RNN基础代码，简单对生成的正弦波数据进行预测
+# 主要是为了展示RNN的基本用法和数据处理流程
 import torch
 from matplotlib import pyplot as plt
 import torch
