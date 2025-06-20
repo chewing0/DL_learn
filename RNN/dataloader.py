@@ -137,9 +137,10 @@ def seq_data_iter_sequential(corpus, batch_size, num_steps):  #@save
 #         else:
 #             return seq_data_iter_sequential(self.corpus, self.batch_size, self.num_steps)
 
-def load_corpus(max_tokens=-1):
+def load_corpus(file_path, max_tokens=-1):
     """加载《时光机器》文本数据集，返回分词后的索引序列和词汇表对象。"""
-    file_path = r'learning\data\timemachine.txt'
+    # file_path = r'learning\data\timemachine.txt'
+    # file_path = r'learning\data\shakespeare.txt'
     processor = TextDeal(file_path)
     corpus, vocab = processor.load_corpus(token_type='char', max_tokens=max_tokens)
     return corpus, vocab
@@ -149,19 +150,19 @@ class SeqDataLoader:
     封装加载序列数据的迭代器
     返回：数据加载器和vocab
     '''
-    def __init__(self, batch_size, num_steps, use_random_iter, max_tokens):
+    def __init__(self, batch_size, num_steps, use_random_iter, file_path, max_tokens):
         if use_random_iter:
             self.data_iter_fn = seq_data_iter_random
         else:
             self.data_iter_fn = seq_data_iter_sequential
         self.batch_size = batch_size
         self.num_steps = num_steps
-        self.corpus, self.vocab = load_corpus(max_tokens)
+        self.corpus, self.vocab = load_corpus(file_path, max_tokens)
     
     def __iter__(self):
         return self.data_iter_fn(self.corpus, self.batch_size, self.num_steps)
     
-def load_data(batch_size, num_steps, use_random_iter=False, max_tokens=10000):
+def load_data(batch_size, num_steps, use_random_iter=False, file_path=r'learning\data\timemachine.txt', max_tokens=10000):
     """
     加载《时光机器》数据集，返回数据加载器和词汇表对象。
     :param batch_size: 批量大小
@@ -170,7 +171,7 @@ def load_data(batch_size, num_steps, use_random_iter=False, max_tokens=10000):
     :param max_tokens: 最大令牌数
     :return: 数据加载器和词汇表对象
     """
-    data_iter = SeqDataLoader(batch_size, num_steps, use_random_iter, max_tokens)
+    data_iter = SeqDataLoader(batch_size, num_steps, use_random_iter, file_path, max_tokens)
     return data_iter, data_iter.vocab
 
 

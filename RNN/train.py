@@ -124,13 +124,14 @@ def train_ch8(net, train_iter, vocab, lr, num_epochs, device, use_random_iter=Fa
         updater = torch.optim.SGD(net.parameters(), lr)
     else:
         updater = lambda batch_size: sgd(net.params, lr, batch_size)
-    predict = lambda prefix: predict_ch8(prefix, 50, net, vocab, device)
+    predict = lambda prefix: predict_ch8(prefix, 60, net, vocab, device)
     # 训练和预测
     for epoch in range(num_epochs):
-        ppl, speed = train_epoch_ch8(
-            net, train_iter, loss, updater, device, use_random_iter)
+        ppl, speed = train_epoch_ch8(net, train_iter, loss, updater, device, use_random_iter)
         if (epoch + 1) % 10 == 0:
-            print(predict('time traveller'))
+            # 打印进度条
+            prediction = predict('time traveller')
+            print(f"Epoch {epoch + 1}/{num_epochs} {prediction}")
     print(f'困惑度 {ppl:.1f}, {speed:.1f} 词元/秒 {str(device)}')
     print(predict('time traveller'))
     print(predict('traveller'))
